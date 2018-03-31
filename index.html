@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Calculadore de calorías</title>
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <link rel="manifest" href="manifest.json" />
+    <style>
+      body{
+        margin: 0;
+        padding:0;
+        color:green
+      }
+      main{
+        margin: 0 auto;
+        max-width: 1080px;
+        background-color: mediumslateblue;
+        padding: 1em;
+        min-height: 100vh;
+      }
+      h1.title {
+        text-align: center;
+        color: #e9e9e9;
+        font-size: 2em;
+        margin-bottom: 1em;
+      }
+      header, section{
+        padding: 1em;
+        margin: 1em;
+        background-color: azure;
+        border-radius: 1em;
+        text-align: center;
+      }
+      header input{
+        border: none;
+        background-color: transparent;
+        border-bottom: 2px solid;
+        font-size: 1em;
+        text-align: center;
+        width: 100px;
+      }
+      section input{
+        margin: .2em;
+        padding: 1em;
+      }
+      section div.sports{
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        grid-gap: 1em;
+      }
+      h2.result {
+        color:red;
+      }
+      @media only screen and (max-device-width : 1080px){
+          main{
+            max-width: 100%;
+          }
+      }
+    </style>
+    <script>
+    const SPORTS = {
+      "Caminar paseo": 2.5,
+      "Caminar con el perro": 3,
+      "Caminar normal(4.5km/h)": 3.3,
+      "Caminar rápido(5.3km/h)": 3.8,
+      "Caminar muy rápido(6.4km/h)": 5,
+      "Caminar sobre hierba": 5,
+      "Caminar en cuesta moderada": 7,
+      "Caminar en cuesta pronunciada": 9,
+      "Correr(8.4 km/h)": 9,
+      "Correr(9.6 km/h)": 10,
+      "Correr(10.8 km/h)": 11,
+      "Correr(11.3 km/h)": 11.5,
+      "Correr(12.1 km/h)": 12.5,
+      "Correr(12.9 km/h)": 13.5,
+      "Correr(13.8 km/h)": 14,
+      "Correr(14.5 km/h)": 15,
+      "Correr(16.1 km/h)": 16,
+      "Correr(17.5 km/h)": 18,
+      "Bici estática(100 watts)": 5.5,
+      "Bici estática(150 watts)": 7.5,
+      "Bici estática(200 watts)": 10.5,
+      "Bici estática(250 watts)": 12.5,
+      "Bici estática(300 watts)": 18,
+      "Bici paseo(<16km/h)": 4,
+      "Bici(16-19km/h)": 6,
+      "Bici(19-22.5km/h)": 8,
+      "Bici(22.5-24km/h)": 10,
+      "Nadar despacio": 6,
+      "Nadar de espalda": 7,
+      "Nadar croll moderado": 8,
+      "Nadar de braza": 10,
+      "Nadar croll rápido": 11,
+      "Nadar mariposa": 11,
+      "Gimnasio general": 5.5,
+      "Elíptica": 7,
+      "Máquina de escaleras": 9,
+      "Estiramientos o Yoga": 2.5,
+      "Baile (flamenco, general, griego)": 4.5,
+      "Baile (ballet, o moderno: twist)": 4.8,
+      "Baile aeróbic": 6.5,
+      "Aeróbic step": 8.5,
+    }
+    const KCAL_MINUTE = 0.0175;
+    class Person{
+      constructor(weight) {
+        this.weight = weight;
+      }
+      kcal_burns(sport, minutes){
+        var calculator = new Calculator(sport,minutes)
+        return calculator.kcal(this.weight)
+      }
+    }
+    class Calculator {
+      constructor(sport, minutes) {
+        this.sport = sport;
+        this.minutes = minutes;
+      }
+      kcal(weight){
+        var met = new Met(this.sport)
+        return met.number() * KCAL_MINUTE * this.minutes * weight
+      }
+    }
+    class Met {
+      constructor(sport) {
+        this.met = SPORTS[sport];
+      }
+      number(){
+        return this.met
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var sports = document.querySelector('.sports')
+      Object.keys(SPORTS).forEach(function(sport) {
+        var button = document.createElement('input');
+        button.type = 'button'
+        button.className = "sport";
+        button.value = sport;
+        sports.appendChild(button)
+      })
+      run();
+      registerSW();
+      function run() {
+        var sports = document.querySelectorAll('.sport')
+        var inputs = document.querySelectorAll('input')
+        sports.forEach(function(sport){
+          sport.addEventListener('click', function(sport) {
+            person = new Person(parseInt(inputs[0].value))
+            document.querySelector('h2.result').textContent = "Resultado: " + parseInt(person.kcal_burns(sport.target.value, parseInt(inputs[1].value))) + "Kcal."
+          }.bind(this));
+        });
+      }
+      function registerSW() {
+        if (!('serviceWorker' in navigator)) {
+          console.error("Service worker not supported")
+          return;
+        }
+        navigator.serviceWorker.register('/sw.js'/*, {scope: '/kcalculator/'}*/).then(function(registration){
+          console.info('Service worker registered', registration.scope)
+        });
+      }
+    });
+
+  </script>
+  </head>
+  <body>
+    <main>
+      <h1 class="title">Calculadora de calorías</h1>
+      <header>
+        <h2>Cuanto pesas ? &nbsp;<input type="text" name="weight"></h2>
+        <h2>Cuanto tiempo? <input type="text" name="time"></h2>
+      </header>
+      <section>
+        <div class="result"><h2 class="result"></h2></div>
+        <div class="sports"></div>
+      </section>
+    </main>
+  </body>
+</html>
