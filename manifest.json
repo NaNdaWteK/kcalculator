@@ -1,7 +1,7 @@
 {
   "name": "Calculadora calorías actividad",
   "short_name": "Calculadora calorías ",
-  "display": "standalone",
+  "display": "fullscreen",
   "start_url": "/",
   "theme_color": "#7561e9",
   "background_color": "#7561e9",
